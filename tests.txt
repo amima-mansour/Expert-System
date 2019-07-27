@@ -35,3 +35,33 @@
     queries = ['A'] 
 
     dic['A'] = [['B'], ['C']]
+
+    dic = {}
+    dic['E'] = [['A', 'B', 'C', '+', '|']]
+    dic['E'] = [['F', 'G', '|', 'H', '+']]
+    dic1 = {}
+    facts = ['G', 'H']
+    queries = ['E']
+    
+    # print("SIMPLE")
+    # for key, element in created_node.items():
+    #     print("key = {}, value = {}\nrules".format(key, element.val))
+    #     for el in element.rules:
+    #         for i in el:
+    #             if isinstance(i, Node): 
+    #                 print("{}, ".format(i.c)),
+    #             else:
+    #                 print("{}, ".format(i)),
+    #             print("\n")
+    # print("COMPOSED")
+    # for key, element in composed_node.items():
+    #     print("key = {}, value = {}\nrules".format(key, element.val))
+    #     for el in element.rules:
+    #         for i in el:
+    #             if isinstance(i, Node): 
+    #                 print("{}, ".format(i.c)),
+    #                 print("")
+    #             else:
+    #                 print("{}, ".format(i)),
+    #                 print("")
+    #             print("\n")

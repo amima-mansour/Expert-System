@@ -18,10 +18,16 @@ def eval_postfix(expr):
     stack = Stack()
     for token in expr:
         if token == "+":
-            result = stack.pop() and stack.pop()
+            a = stack.pop()
+            b = stack.pop()
+            result = a and b
+            print(" + a => {} b => {} result = {}".format(a, b, result))
             stack.push(result)
         elif token == "|":
-            result = stack.pop() or stack.pop()
+            a = stack.pop()
+            b = stack.pop()
+            result = a or b
+            print(" | a => {} b => {} result = {}".format(a, b, result))
             stack.push(result)
         elif token == "^":
             a = stack.pop()
@@ -33,7 +39,6 @@ def eval_postfix(expr):
             stack.push(result)
         else:
             stack.push(token)
-    print(stack)
     return stack.pop()
 
 def reverse_eval_postfix(result, value, op):
@@ -45,7 +50,7 @@ def reverse_eval_postfix(result, value, op):
             return False
         if value == False:
             return (True)
-        return ("Undetermined")
+        return (False)
     if op == '+':
         if result == True:
             if value == False:
@@ -54,4 +59,4 @@ def reverse_eval_postfix(result, value, op):
             return (True)
         if value == True:
             return (False)
-        return ("Undetermined")
+        return (False)
