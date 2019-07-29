@@ -17,7 +17,6 @@ class Stack:
 
 def eval_postfix(expr):
     stack = Stack()
-    print("expr = {}".format(expr))
     for token in expr:
         if token == "+":
             a = stack.pop()
@@ -27,7 +26,6 @@ def eval_postfix(expr):
         elif token == "|":
             a = stack.pop()
             b = stack.pop()
-            print("a => {} b => {}".format(a, b))
             result = a or b
             stack.push(result)
         elif token == "^":
@@ -40,15 +38,12 @@ def eval_postfix(expr):
             stack.push(result)
         else:
             stack.push(token)
-    a = stack.pop()
-    print("result1 = {}".format(a))
-    return a
+    return stack.pop()
 
 def reverse_eval_postfix(result, expr, c):
+    print("expr = {}".format(expr))
     expr[expr.index(c)] = True
-    print(expr)
     value = eval_postfix(expr)
     if value == result:
-        print("je return true")
         return True
     return False

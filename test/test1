@@ -1,0 +1,16 @@
+# this is a comment$
+# all the required rules and symbols, along with the bonus ones, will be
+# shown here. spacing is not important
+B => A
+D + E  => B
+G + H  => F
+I + J => G
+G => H
+L + M => K
+O + P => L + N
+N => M 
+=DEIJOP
+#=DEIJP
+?AFPK
+#=DEIJP
+#?AFP

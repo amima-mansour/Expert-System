@@ -27,10 +27,11 @@ i = 0
 length = len(queries)
 while i < length:
     n = node.created_node[queries[i]]
-    if not queries[i] in facts:
-        results[n.c] = s.resolve(n)
+    if queries[i] in facts or n.c in node.intern_queries:
+        results[n.c] = n.val
     else:
-        results[n.c] = True
+        s.resolve(n)   
+        results[n.c] = n.val
     i += 1
 for key, element in results.items():
     print("{} => {}".format(key, element))

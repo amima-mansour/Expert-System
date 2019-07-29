@@ -3,7 +3,7 @@ import solution
 
 created_node = {}
 composed_node = {}
-facts = []
+intern_queries = []
 
 class Node:
     def __init__(self, c, val):
@@ -30,7 +30,6 @@ class Node:
                     r.append(element)
             self.rules.append(r)
 
-intern_queries = []
 
 class Resolve:
     def __init__(self, nodes):
@@ -62,76 +61,64 @@ class Resolve:
         expr = []
         for r in rule:
             if isinstance(r, Node):
-                if r.c in intern_queries:
-                    return False
                 if r.val:
                     expr.append(r.val)
+                elif r.c in intern_queries and r.c != c:
+                    expr.append(r.val)
                 else:
-                    result = self.resolve(r)
-                    expr.append(result)
+                    self.resolve(r)
+                    expr.append(r.val)
             else:
                 expr.append(r)
-        result = solution.eval_postfix(expr)
-        print("result3 = {}".format(result))
-        return result
+        return(solution.eval_postfix(expr))
 
     def resolve(self, goal):
-        print("goal = {}".format(goal.c))
-        result = False
         intern_queries.append(goal.c)
+        if goal.c == 'L':
+            print("intern = {}".format(intern_queries))
         for rule in goal.rules:
-            result = self.process(rule, goal.c)
+            goal.val = self.process(rule, goal.c)
+            if goal.val:
+                return
             var = self.check_rules(rule, goal.c)
-            if var and not result and var not in intern_queries:
+            if var and var not in intern_queries:
                 if len(var) == 1:
-                    result = self.resolve(var)
+                    self.resolve(var)
                 else:
-                    result = self.second_resolve(find_rules(var), var)
-            if result:
-                facts.append(goal.c)
-                goal.val = True
-                return True
-        if not result:
+                    goal.val = self.complexe_resolve(find_rules(var), var)
+        if not goal.val:
             rules = find_rules(goal.c)
             if len(rules) > 0:
-                result = self.second_resolve(rules, goal)
-        if result:
-            goal.val = True
-            facts.append(goal.c)
-        return result
+                goal.val = self.complexe_resolve(rules, goal)
 
-    def second_resolve(self, rules, goal):
+    def complexe_resolve(self, rules, goal):
         for key, element in rules.items():
             expr = []
             for rule in element:
                 result = self.process(rule, goal.c)
-                print("result2 = {}".format(result))
                 var = self.check_rules(rule, key)
                 if not result and var:
                     if len(var) == 1:
-                        result = self.resolve(var)
+                        self.resolve(var)
                     else:
-                        result = self.second_resolve(find_rules(var), var)
+                        result = self.complexe_resolve(find_rules(var), var)
                 k = key.replace(" ", "")
                 for c in k:
-                    if not c in created_node and c not in intern_queries:
-                        expr.append(c)
-                    elif c == goal.c:
-                        expr.append(c)
-                    elif c in intern_queries:
-                        expr.append(created_node[c].val)
+                    if c.isupper() and c != goal.c:
+                        node = created_node[c]
+                        if node.val:
+                            expr.append(node.val)
+                        elif c in intern_queries:
+                            expr.append(node.val)
+                        else:
+                            self.resolve(node)
+                            expr.append(node.val)
                     else:
-                        expr.append(self.resolve(created_node[c]))
+                        expr.append(c)
                 value = solution.reverse_eval_postfix(result, expr, goal.c)
-                if value:
-                    goal.val = True
-                    facts.append(goal.c)
-                    print("facts = {}".format(facts))
-                    return value
         return value
 
-def storage_nodes(rules, f):
-    facts = f
+def storage_nodes(rules, facts):
     for key, element in rules.items():
         if key not in created_node:
             val = False
@@ -143,8 +130,7 @@ def storage_nodes(rules, f):
         else:
             created_node[key].add_rules(element, facts)
 
-def storage_multiple_nodes(rules, f):
-    facts = f
+def storage_multiple_nodes(rules, facts):
     for key, rule in rules.items():
         composed_node[key] = []
         elements = list(key.replace(" ", ""))
