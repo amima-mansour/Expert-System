@@ -1,4 +1,6 @@
-import sys
+#!/usr/bin/Python3.4
+
+import errors
 
 class Stack:
     def __init__(self):
@@ -14,20 +16,19 @@ class Stack:
         return (self.items == [])
 
 def eval_postfix(expr):
-    print(expr)
     stack = Stack()
+    print("expr = {}".format(expr))
     for token in expr:
         if token == "+":
             a = stack.pop()
             b = stack.pop()
             result = a and b
-            print(" + a => {} b => {} result = {}".format(a, b, result))
             stack.push(result)
         elif token == "|":
             a = stack.pop()
             b = stack.pop()
+            print("a => {} b => {}".format(a, b))
             result = a or b
-            print(" | a => {} b => {} result = {}".format(a, b, result))
             stack.push(result)
         elif token == "^":
             a = stack.pop()
@@ -39,24 +40,15 @@ def eval_postfix(expr):
             stack.push(result)
         else:
             stack.push(token)
-    return stack.pop()
+    a = stack.pop()
+    print("result1 = {}".format(a))
+    return a
 
-def reverse_eval_postfix(result, value, op):
-    if op == '|':
-        if result == False:
-            if value == True:
-                print ("conflict")
-                sys.exit(-1)
-            return False
-        if value == False:
-            return (True)
-        return (False)
-    if op == '+':
-        if result == True:
-            if value == False:
-                print ("conflict")
-                sys.exit(-1)
-            return (True)
-        if value == True:
-            return (False)
-        return (False)
+def reverse_eval_postfix(result, expr, c):
+    expr[expr.index(c)] = True
+    print(expr)
+    value = eval_postfix(expr)
+    if value == result:
+        print("je return true")
+        return True
+    return False

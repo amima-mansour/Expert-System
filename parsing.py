@@ -1,57 +1,200 @@
-import re
-import argparse
+#!/usr/bin/Python3.4
 
-def parsing_test(string):
-    while string and '(' in string:
-        key = string.index('(')
-        part = string[:key]
-        string = string[key + 1:]
-        if part and not re.match(r"^(!)?[A-Z]([\+\^\|])?$", part):
+import errors
+import RPN as rpn
+
+def file_opener(name):
+    'Try to open the file, takes it\'s name and return it\'s content as a string'
+
+    if name is None:
+        return None
+    try:
+        f = open(name, "r")
+    except:
+        errors.file_fail(name, "failed to open")
+        return None
+    if f.mode == "r":
+        content = f.read()
+        return content
+    else:
+        errors.file_fail(name, "couldn't read")
+
+def is_upper(c):
+    'Check if a string / character is upper alphabetical value'
+    
+    if type(c) is chr:
+        ascii_val = ord(c)
+        if ascii_val < 65 or ascii_val > 90:
             return False
-        if ')' in string:
-            key = len(string) - string[::-1].index(')') - 1
-            part = string[key + 1:]
-            string = string[:key]
-            if part and not re.match(r"^([\+\^\|](!)?[A-Z])*$", part):
+        return True
+    else:
+        for e in c:
+            ascii_val = ord(e)
+            if ascii_val < 65 or ascii_val > 90:
                 return False
-    if string and not re.match(r"^(!)?[A-Z]([\+\^\|](!)?[A-Z])*$", string):
+        return True
+
+def brackets(s):
+    'The function below checks if parentheses are correctly closed'
+
+    stack = []
+    pushChar = '('
+    popChar = ')'
+    for c in s:
+        if c == pushChar:
+            stack.append(c)
+        elif c == popChar:
+            if stack == []:
+                return False
+            else:
+                stack.pop()
+    return stack == []
+
+def rule_is_valid(line):
+    'Check if a rule is given a valid way'
+
+    ops = {
+            '!': [['(', '+', '|', '^', 'S'], ['(', 'L']],
+            '^': [[')', 'L'], ['(', 'L', '!']],
+            '+': [[')', 'L'], ['(', 'L', '!']],
+            '|': [[')', 'L'], ['(', 'L', '!']],
+            '(': [['(', '!', '+', '|', '^', 'S'], ['(', 'L']],')': [['L'], ['+', '|', '^', 'E']],
+            'L': [['(', '+', '|', '^', 'S', '!'], [')', '+', '|', '^', 'E']],
+            }
+    split = line.split("=>")
+    if len(split) != 2:
         return False
+    for part in split:
+        if not brackets(part):
+            return False
+        i = 0
+        l = len(part)
+        if l < 1:
+            return False
+        while i < l:
+            if is_upper(part[i]):
+                if (i > 0):
+                    if is_upper(part[i - 1]) or part[i - 1] not in ops['L'][0]:
+                        return False
+                elif (i + 1 < l):
+                    if is_upper(part[i + 1]) or part[i + 1] not in ops['L'][1]:
+                        return False
+            elif part[i] in ops:
+                if i == 0:
+                    if 'S' not in ops[part[i]][0]:
+                        return False
+                elif is_upper(part[i - 1]):
+                    if 'L' not in ops[part[i]][0]:
+                        return False
+                elif part[i - 1] not in ops[part[i]][0]:
+                    return False
+                if i + 1 >= l:
+                    if 'E' not in ops[part[i]][1]:
+                        return False
+                elif is_upper(part[i + 1]):
+                    if 'L' not in ops[part[i]][1]:
+                        return False
+                elif part[i + 1] not in ops[part[i]][1]:
+                    return False
+            elif part[i] != '<' or i + 1 != l:
+                return False
+            i += 1
     return True
 
-parser = argparse.ArgumentParser(description='EXPERT SYSTEM @ 42')
-parser.add_argument("input", help="input file", type=argparse.FileType('r'))
-args = parser.parse_args()
-data = args.input.read().splitlines()
-args.input.close()
-data = [x for x in data if x[0] != '#']
-# parsing
-rules = []
-for el in data:
-    el = filter(None, re.split(r'#.*', el))[0]
-    if ">" in el:
-        left, right = re.split("=>|<=>", el)
-        left = left.replace(" ", "")
-        if not parsing_test(left):
-            print "ERROR SYNTAX {}".format(left)
-            exit()
-        # left = re.split("([^A-Z])", left.replace(" ", ""))
-        # left = [x for x in left if x]
-        # right = re.split("([^A-Z])", right.replace(" ", ""))=
-        # right = [x for x in right if x]
-        # print left, right
-    elif el[0] == '=':
-        facts = list(el[1:].replace(" ", ""))
-    elif el[0] == '?':
-        queries = list(el[1:].replace(" ", ""))
-    else:
-        print "ERROR"
-        exit()
-if len(rules) == 0 or len(facts) == 0 or len(queries) == 0:
-    print "ERROR"
-    exit()
+class Inputs:
+    """Class storing information about rules, queries, and initial facts given in a string.
+        For each one, uses the corresponding function, and checks if the format is correct.
+        Keep in track th current line read in case an error occurs to display it."""
 
-# Syntax Error => OK
-# Wrong character => OK
-# NO => or <=> in a rule
-# No respect of the rule : Alphabatic character + operator only for negation : match expression = r"(!)?[A-Z]([\+\^\|](!)?[A-Z])*" => OK
-# Contradiction : How to resolve them
+    def __init__(self):
+        self.line = 0
+        self.nodes = dict()
+        self.multi_rules = dict()
+        self.queries = []
+        self.entries = []
+        self.current = "rules"
+
+    def take_entries(self, line):
+        'Takes initial facts that should be true, set them in the class. Starts with \'?\''
+
+        if self.current != "rules":
+            if self.current == "entries":
+                msg = "Only one line for initial facts allowed"
+            else:
+                msg = "You cannot insert initial facts here, respect the order : " \
+                        + "Rules => Initial facts => Queries"
+            errors.parse(self.line, msg)
+        if not is_upper(line):
+            errors.parse(self.line, "Initial facts not well formated, only upper-case " \
+                    + "alphabetical characters allowed")
+        for c in line:
+            self.entries.append(c)
+        self.current = "entries"
+
+    def take_queries(self, line):
+        'Takes queries requiered by user, set them in the class. Starts with \'=\''
+
+        if self.current != "entries":
+            if self.current == "queries":
+                msg = "Only one line for querys allowed"
+            else:
+                msg = "You cannot insert queries here, respect the order : " \
+                        + "Rules => Initial facts => Queries"
+            errors.parse(self.line, msg)
+        if not is_upper(line):
+            errors.parse(self.line, "Query not well formated, only upper-case alphabetical " \
+                    + "characters allowed")
+        for c in line:
+            self.queries.append(c)
+        self.current = "queries"
+    
+    def take_rules(self, line):
+        'Takes a rule given on a line, add it to the class'
+
+        if self.current != "rules":
+            errors.parse(self.line, "You cannot insert a rule here, respect the order : " \
+                    + "Rules => Initial facts => Queries")
+        elif not rule_is_valid(line):
+            errors.parse(self.line, "Rule is not well formated")
+        eq = line.split("=>")
+        if eq[0][-1] == '<':
+            eq[0] = eq[0][:-1]
+            equi = 1
+        else:
+            equi = 0
+        while equi > -1:
+            if len(eq[1 if equi == 0 else 0]) == 1:
+                refDic = self.nodes
+            else:
+                refDic = self.multi_rules
+            opKey = rpn.shunting(rpn.get_input(eq[1 if equi == 0 else 0]))[-1][2]
+            if opKey not in refDic:
+                refDic[opKey] = []
+            refDic[opKey].append(rpn.shunting(rpn.get_input(eq[0 if equi == 0 else 1]))[-1][2])
+            equi -= 1
+
+    def parsing(self, content):
+        'Main function called to read the content of the file'
+
+        print("File input :\n" + content)
+        content = content.replace(" ", "")
+        content = content.replace("\t", "")
+        lines = content.split("\n")
+        for line in lines:
+            self.line += 1
+            if '#' in line:
+                line = line[:line.index('#')]
+            if line == "":
+                continue
+            if line[0] == '=':
+                self.take_entries(line[1:])
+            elif line[0] == '?':
+                self.take_queries(line[1:])
+            else:
+                self.take_rules(line)
+        print("line : " + str(self.line))
+        print("nodes : " + str(self.nodes))
+        print("multi.rules : " + str(self.multi_rules))
+        print("entries : " + str(self.entries))
+        print("queries : " + str(self.queries))
+        print("current : " + str(self.current))
