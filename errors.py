@@ -4,8 +4,8 @@ from sys import exit
 import colors
 
 def usage():
-    print("Usage : " + colors.red + "./Expert_system.py" + colors.green \
-            + " file.txt" + colors.normal)
+    print("Usage : " + colors.red + "./Expert_system.py" + colors.blue + " [-di]" \
+            + colors.green + " file.txt" + colors.normal)
     exit()
 
 def file_fail(file_name, message):
@@ -25,4 +25,8 @@ def parse(line, message):
 
 def conflict(c):
     print(colors.red + "Conflict in node " + str(c) + colors.normal)
+    exit()
+    
+def stoped_input():
+    print(colors.red + "You stoped the program, see you later !" + colors.normal)
     exit()

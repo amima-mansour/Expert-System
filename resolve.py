@@ -7,8 +7,9 @@ import colors
 # list of nodes whose value has already been found or being searched
 intern_queries = []
 # MAKE IT BEAUTIFUL
-tab = "\t\t" + colors.bg_blue + " " + colors.normal
+tab = "\t" + colors.bg_blue + " " + colors.normal
 space_mountain = colors.bg_blue + " " + colors.normal
+display = False
 
 class Resolve:
     def __init__(self, nodes):
@@ -80,9 +81,10 @@ class Resolve:
         # In order to avoid an infinite loop of search  
         if goal.c in intern_queries or goal.val == True:
             return
-        global space_mountain
-        print(space_mountain + "We're looking for " + goal.c)
-        space_mountain += tab
+        if display:
+            global space_mountain
+            print(space_mountain + "We're looking for " + colors.cyan + goal.c + colors.normal)
+            space_mountain += tab
         # Every time we search for the value of a node, we put its goal.c in intern_queries
         intern_queries.append(goal.c)
         goal.val = None
@@ -90,6 +92,8 @@ class Resolve:
         tmp = {'f': None, 't':False}
         # we check all the rules in goal.rules except in the case of conflict
         for rule in goal.rules:
+            if display:
+                print(space_mountain + colors.purple + rule_to_key(rule) + " => " + goal.c + colors.normal)
             # we search of the evaluation of the rule and we put it in a temprory value
             tmp['t'] = self.process(rule, goal.c)
             if tmp['t'] == True and tmp['t'] != tmp['f'] and tmp['f'] is not None:
@@ -107,15 +111,15 @@ class Resolve:
                     key = find_key(rule)
                     # this to avoid an infinite loop if we have this  case A + B => A + B
                     if key in rules and rule in rules[key]:
-                        space_mountain = space_mountain[:-12]
-                        print(space_mountain + "Value set to {}".format(goal.val))
+                        if display:
+                            space_mountain = space_mountain[:-11]
+                            print(space_mountain + "Value set to " + colors.cyan + "{}".format(goal.val) + colors.normal)
                         return
                     tmp['f'] = self.complexe_resolve(rules, goal, rule_to_key(rule))
                 if tmp['t'] == True and tmp['t'] != tmp['f'] and tmp['f'] is not None:
                     errors.conflict(goal.c)
             elif tmp['t'] == True:
                 tmp['f'] = True
-
         # in this step, we search rules in our node.composed_nodes and check or search value 
         rules = find_rules(goal.c)
         if len(rules) > 0:
@@ -124,10 +128,13 @@ class Resolve:
             errors.conflict(goal.c)
         if goal.val is None and tmp['f'] is not None:
             goal.val = tmp['f']
-        elif goal.val is None:
+        elif goal.val is None and tmp['t'] is not None:
             goal.val = tmp['t']
-        space_mountain = space_mountain[:-12]
-        print(space_mountain + "Value set to {}".format(goal.val))
+        else:
+            goal.val = False
+        if display:
+            space_mountain = space_mountain[:-11]
+            print(space_mountain + "Value set to " + colors.cyan + "{}".format(goal.val) + colors.normal)
         
              
     def complexe_resolve(self, rules, goal, key_tmp):
@@ -139,7 +146,13 @@ class Resolve:
             expr = []
             if key_tmp == key:
                 continue
+            if display:
+                global space_mountain
+                print(space_mountain + "We're looking for " + colors.cyan + key + colors.normal)
+                space_mountain += tab
             for rule in element:
+                if display:
+                    print(space_mountain + colors.purple + rule_to_key(rule) + " => " + key + colors.normal)
                 # we evaluate the first part of the predicat
                 temp = self.process(rule, goal.c)
                 # we check if there is an equivalence for the rule
@@ -153,6 +166,9 @@ class Resolve:
                         rules = find_rules(var)
                         k1 = find_key(rule)
                         if k1 in rules and rule in rules[k1]:
+                            if display:
+                                space_mountain = space_mountain[:-11]
+                                print(space_mountain + "Value set to " + colors.cyan + "{}".format(temp) + colors.normal)
                             return
                         temp1 = self.complexe_resolve(find_rules(var), goal, rule_to_key(rule))
                 elif temp == False:
@@ -209,6 +225,9 @@ class Resolve:
                     # if we have temp True and goal has not a definite value, we seek for goal value 
                     value = RPN_calc.reverse_eval_postfix(temp, expr, goal.c)
                     goal.val = value
+            if display:
+                space_mountain = space_mountain[:-11]
+                print(space_mountain + "Value set to " + colors.cyan + "{}".format(temp) + colors.normal)
 
 def find_rules(n):
     """

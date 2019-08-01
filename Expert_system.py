@@ -8,11 +8,24 @@ import node
 import resolve as res
 import beautiful_print as bp
 
-if len(av) != 2:
+if len(av) == 3 and av[1] == "-d":
+    argu = av[2]
+    res.display = True
+elif len(av) != 2:
     errors.usage()
-content = parsing.file_opener(av[1])
+else:
+    if parsing.valid_arg(av[1]):
+        parsing.user_input = True
+        if 'd' in av[1]:
+            res.display = True
+    else:
+        argu = av[1]
+if not parsing.user_input:
+    content = parsing.file_opener(argu)
+else:
+    content = parsing.get_input()
 if content is "":
-    errors.empty(av[1])
+    errors.empty(argu)
 inputs = parsing.Inputs()
 inputs.parsing(content)
 facts = inputs.entries
@@ -25,7 +38,8 @@ if len(dic2) > 0:
     node.storage_multiple_nodes(dic2, facts)
 results = {}
 s = res.Resolve(node.created_node)
-bp.print_title("Resolution :")
+if res.display:
+    bp.print_title("Resolution :")
 i = 0
 length = len(queries)
 while i < length:

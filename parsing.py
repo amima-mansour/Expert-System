@@ -4,6 +4,27 @@ import errors
 import RPN as rpn
 import beautiful_print as bp
 
+user_input = False
+
+def get_input():
+    bp.print_title("Please enter your input : ")
+    line = ""
+    content = ""
+    while not line.startswith('?'):
+        try:
+            line = input()
+        except:
+            errors.stoped_input()
+        content += line + '\n'
+    return content
+
+def valid_arg(arg):
+    if (len(arg) != 2 and len(arg) != 3) or arg[0] != '-':
+        return False
+    if arg[1:] != 'd' and arg[1:] != 'i' and arg[1:] != "di" and arg[1:] != "id":
+        errors.usage()
+    return True
+
 def file_opener(name):
     'Try to open the file, takes it\'s name and return it\'s content as a string'
 
@@ -178,8 +199,9 @@ class Inputs:
     def parsing(self, content):
         'Main function called to read the content of the file'
         
-        bp.print_title("File input :")
-        print(content)
+        if not user_input:
+            bp.print_title(" Input :")
+            print(content)
         content = content.replace(" ", "")
         content = content.replace("\t", "")
         lines = content.split("\n")

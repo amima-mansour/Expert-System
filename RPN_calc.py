@@ -37,6 +37,7 @@ def reverse_eval_postfix(result, expr, c):
         Takes the result <bool> of the equation, it's expr <list>,
         and the c <char> we're looking for."""
 
+    # print("expr = {}".format(expr))
     expr2 = list(expr)
     expr[expr.index(c)] = True
     value1 = eval_postfix(expr)
@@ -51,7 +52,10 @@ def reverse_eval_postfix(result, expr, c):
 if __name__ == '__main__':
     from sys import argv as av
 
-    if len(av) > 1:
+    if len(av) == 3 and av[1] == "-r":
+        expr = list(av[2])
+        print(reverse_infix(expr))
+    elif len(av) > 1:
         expr = []
         for arg in av[1:]:
             if arg == 'T':
@@ -62,4 +66,3 @@ if __name__ == '__main__':
                 expr.append(arg)
         print("For input {}".format(expr))
         print("eval_postfix = {}".format(eval_postfix(expr)))
-
