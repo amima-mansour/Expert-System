@@ -3,8 +3,10 @@
 from sys import argv as av
 import errors
 import parsing
-import solution
-import Node as node
+import RPN_calc
+import node
+import resolve as res
+import beautiful_print as bp
 
 if len(av) != 2:
     errors.usage()
@@ -22,16 +24,21 @@ if len(dic1) > 0:
 if len(dic2) > 0:
     node.storage_multiple_nodes(dic2, facts)
 results = {}
-s = node.Resolve(node.created_node)
+s = res.Resolve(node.created_node)
+bp.print_title("Resolution :")
 i = 0
 length = len(queries)
 while i < length:
-    n = node.created_node[queries[i]]
-    if queries[i] in facts or n.c in node.intern_queries:
-        results[n.c] = n.val
+    if queries[i] not in node.created_node:
+        results[queries[i]] = False
     else:
-        s.resolve(n)   
-        results[n.c] = n.val
+        n = node.created_node[queries[i]]
+        if queries[i] in facts or n.c in res.intern_queries:
+            results[n.c] = n.val
+        else:
+            s.resolve(n)   
+            results[n.c] = n.val
     i += 1
+bp.print_title("Results : ")
 for key, element in results.items():
     print("{} => {}".format(key, element))

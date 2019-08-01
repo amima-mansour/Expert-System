@@ -23,6 +23,6 @@ def parse(line, message):
             + message + colors.normal)
     exit()
 
-def conflict(op):
-    print(colors.red + "Conflict on operator " + str(op) + colors.normal)
+def conflict(c):
+    print(colors.red + "Conflict in node " + str(c) + colors.normal)
     exit()

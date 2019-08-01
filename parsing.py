@@ -2,6 +2,7 @@
 
 import errors
 import RPN as rpn
+import beautiful_print as bp
 
 def file_opener(name):
     'Try to open the file, takes it\'s name and return it\'s content as a string'
@@ -58,8 +59,9 @@ def rule_is_valid(line):
             '^': [[')', 'L'], ['(', 'L', '!']],
             '+': [[')', 'L'], ['(', 'L', '!']],
             '|': [[')', 'L'], ['(', 'L', '!']],
-            '(': [['(', '!', '+', '|', '^', 'S'], ['(', 'L']],')': [['L'], ['+', '|', '^', 'E']],
-            'L': [['(', '+', '|', '^', 'S', '!'], [')', '+', '|', '^', 'E']],
+            '(': [['(', '!', '+', '|', '^', 'S'], ['(', 'L']],
+            ')': [['L'], ['+', '|', '^', 'E', '<']],
+            'L': [['(', '+', '|', '^', 'S', '!'], [')', '+', '|', '^', 'E', '<']],
             }
     split = line.split("=>")
     if len(split) != 2:
@@ -76,7 +78,7 @@ def rule_is_valid(line):
                 if (i > 0):
                     if is_upper(part[i - 1]) or part[i - 1] not in ops['L'][0]:
                         return False
-                elif (i + 1 < l):
+                if (i + 1 < l):
                     if is_upper(part[i + 1]) or part[i + 1] not in ops['L'][1]:
                         return False
             elif part[i] in ops:
@@ -175,8 +177,9 @@ class Inputs:
 
     def parsing(self, content):
         'Main function called to read the content of the file'
-
-        print("File input :\n" + content)
+        
+        bp.print_title("File input :")
+        print(content)
         content = content.replace(" ", "")
         content = content.replace("\t", "")
         lines = content.split("\n")
@@ -192,9 +195,3 @@ class Inputs:
                 self.take_queries(line[1:])
             else:
                 self.take_rules(line)
-        print("line : " + str(self.line))
-        print("nodes : " + str(self.nodes))
-        print("multi.rules : " + str(self.multi_rules))
-        print("entries : " + str(self.entries))
-        print("queries : " + str(self.queries))
-        print("current : " + str(self.current))

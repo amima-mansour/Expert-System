@@ -1,0 +1,8 @@
+A => E + F
+E => A + F
+F => E + A
+= #false
+#=E #true
+#=F#true
+#=EF#true
+?A

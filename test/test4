@@ -1,9 +1,0 @@
-# this is a comment$
-# all the required rules and symbols, along with the bonus ones, will be
-# shown here. spacing is not important
-B + !C => A
-=
-#=B
-#=C
-#=BC
-?A

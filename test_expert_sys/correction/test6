@@ -1,0 +1,16 @@
+A | B + C => E
+(F | G) + H => E
+= #false
+##############
+#=A #true
+#=B #false
+#=C #false.
+#=AC #true
+#=BC #true
+##############
+#=F #false
+#=G #false
+#=H #false
+#=FH #true
+#=GH #true
+?E

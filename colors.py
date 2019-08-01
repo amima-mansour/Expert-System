@@ -1,5 +1,6 @@
 #!/usr/bin/Python3.4
 
+bg_blue = "\033[44m"
 red = "\033[31m"
 green = "\033[32m"
 yellow = "\033[33m"

@@ -1,0 +1,6 @@
+A <=> C + D
+B => C + D
+#=A #true
+#=C #false
+=D #true
+?C

@@ -1,0 +1,7 @@
+A + B => H ^ E
+A + B <=> C ^ D
+=#false
+#=C#true
+#=D#true
+#=CD#false
+?H

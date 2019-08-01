@@ -1,0 +1,7 @@
+B => A
+C => A
+= #false
+#=B #true
+#=C #true
+#=BC #true
+?A
