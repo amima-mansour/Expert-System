@@ -14,6 +14,7 @@ display = False
 class Resolve:
     def __init__(self, nodes):
         self.nodes = nodes
+#        intern_queries = []
     
     def check_rules(self, rule, key):
         """
@@ -130,7 +131,7 @@ class Resolve:
             goal.val = tmp['f']
         elif goal.val is None and tmp['t'] is not None:
             goal.val = tmp['t']
-        else:
+        elif goal.val == None:
             goal.val = False
         if display:
             space_mountain = space_mountain[:-11]
@@ -187,7 +188,7 @@ class Resolve:
                             val = True
                             if  next_index < len(k) and k[next_index] == '!':
                                 val = False
-                            if (n.val == True and val == False) or (n.val == False and n.c in intern_queries and val == True): 
+                            if (n.val == True and val == False) or (n.c != goal.c and n.val == False and n.c in intern_queries and val == True): 
                                 errors.conflict(n.c)
                             else:
                                 n.val = val
@@ -200,7 +201,7 @@ class Resolve:
                             val = False 
                             if  next_index < len(k) and k[next_index] == '!':
                                 val = True
-                            if (n.val == True and val == False) or (n.val == False and n.c in intern_queries and val == True):
+                            if (n.val == True and val == False) or (n.c != goal.c and n.val == False and n.c in intern_queries and val == True):
                                 errors.conflict(n.c)
                             else:
                                 n.val = val
